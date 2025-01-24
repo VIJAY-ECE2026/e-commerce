@@ -1,0 +1,66 @@
+
+import { Navigate, Route, Routes } from "react-router-dom"
+import HomePage from "./pages/HomePage.jsx"
+import SignUpPage from "./pages/SignupPage.jsx"
+import LoginPage from "./pages/LoginPage.jsx"
+import AdminPage from "./pages/AdminPage.jsx"
+import CategoryPage from "./pages/CategoryPage.jsx"
+import CartPage from "./pages/CartPage.jsx"
+import PurchaseSuccessPage from "./pages/PurchaseSuccessPage.jsx"
+import PurchaseCancelPage from "./pages/PurchaseCancelPage.jsx"
+
+
+import Navbar from "./components/Navbar"
+import { Toaster } from "react-hot-toast"
+import { useUserStore } from "./stores/useUserStore.js"
+import { use, useEffect } from "react"
+import { useCartStore } from "./stores/useCartStore.js"
+import LoadingSpinner from "./components/LoadingSpinner.jsx"
+
+
+function App() {
+  
+  const {user,checkAuth,checkingAuth} = useUserStore();
+  const{getCartItems}=useCartStore();
+useEffect(() => {
+  checkAuth();
+},[checkAuth]);
+
+useEffect(()=>
+{
+  if(!user) return;
+  getCartItems();
+},[getCartItems,user]);
+
+if(checkingAuth) return <LoadingSpinner/>
+
+  return (
+<div className='min-h-screen bg-black text-white relative overflow-hidden'>
+    <div className='absolute inset-0 overflow-hidden'>
+        <div className='absolute inset-0 bg-black' />
+    </div>
+    
+    <div className='relative z-50 pt-20'>
+        {/* Your content here */}
+
+
+    
+    <Navbar/>
+      <Routes>
+        <Route path="/" element={<HomePage/>} />  
+        <Route path="/signup" element={!user ?<SignUpPage/>:<Navigate to="/"/>} />  
+        <Route path="/login" element={!user ?  <LoginPage/>:<Navigate to="/"/>} />  
+        <Route path="/secret-dashboard" element={user?.role === "admin" ?  <AdminPage/>:<Navigate to="/login"/>} />  
+        <Route path="/category/:category" element={<CategoryPage/>} />
+        <Route path="/cart" element={user ?<CartPage/>:<Navigate to="/login"/>} />
+        <Route path="/purchase-success" element={user ?<PurchaseSuccessPage/>:<Navigate to="/login"/>} />
+        <Route path="/purchase-cancel" element={user ?<PurchaseCancelPage/>:<Navigate to="/login"/>} />
+      </Routes>
+      <Toaster/>
+     
+      </div>
+    </div>
+  )
+}
+
+export default App
